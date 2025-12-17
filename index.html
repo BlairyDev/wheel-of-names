@@ -6,6 +6,8 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
         <script src="https://cdn.jsdelivr.net/gh/zarocknz/javascript-winwheel@master/Winwheel.min.js"></script>
 
+        <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+
         <link rel="stylesheet" href="style.css">
     </head>
     <body>
@@ -19,6 +21,19 @@
                 <textarea id="enter-names"></textarea>
                 <button onClick="startSpin();">Spin the Wheel</button>
                 <button onClick="addNames();">Add names</button>
+                
+                <div class="container-name">
+                    <label for="names">Winner</label>
+                    <h1 id="winner-name"></h1>
+                </div>
+            </div>
+
+            <div id="winner-dialog" class="dialog">
+                <div class="dialog-content">
+                    <label>Winner</label>
+                    <h1 id="winner-name-dialog"></h1>
+                    <button id="close-btn">Close</button>
+                </div>
             </div>
 
         </div>
@@ -31,6 +46,7 @@
             let currentWinner = "";
             let nameList = [];
             let secondTurn = false;
+            const spinButton = document.getElementById('spin-button');
 
             const nameMap = new Map([
                 ["Alesha", "Kiann"], ["Kiann", "Alesha"],
@@ -84,8 +100,31 @@
 
                 });
 
+                const dialog = document.getElementById("winner-dialog");
+                const winnerName = document.getElementById("winner-name-dialog");
+                const closeBtn = document.getElementById("close-btn");
+
+                function showWinner(name) {
+                    winnerName.textContent = name;
+                    dialog.style.display = "flex";
+                    showConfetti();
+                }
+
+                closeBtn.addEventListener("click", () => {
+                    dialog.style.display = "none";
+                    deleteWinningSegment();
+                });
+
+                
+
+                function setWinner(name) {
+                    document.getElementById("winner-name").textContent = name;
+                }
+
                 function calculatePrize() {
                     if (theWheel.numSegments === 0) return;
+
+                    setWinner("");
 
                     if (currentWinner == "") {
 
@@ -128,10 +167,18 @@
                     
                 }
 
+                function showConfetti() {
+                    confetti({
+                        particleCount: 100, // Number of particles
+                        spread: 100,         // How far off center the confetti can go
+                        origin: {y: 0.6 },  // Origin of the explosion (vertical position)
+                        zIndex: 10000 
+                    });
+                }
+
                 function alertPrize()
                 {
                     let winningSegment = theWheel.getIndicatedSegment();
-                    alert("You have won " + winningSegment.text + "!");
                     if(!secondTurn) {
                         currentWinner = winningSegment.text;
                         secondTurn = true;
@@ -139,7 +186,11 @@
                         currentWinner = "";
                         secondTurn = false;
                     }
-                    deleteWinningSegment();
+
+                    setWinner(winningSegment.text);
+
+                    showWinner(winningSegment.text);
+
                 }
                 function getSegmentByText(text) {
                     console.log("selectedName " + text)
