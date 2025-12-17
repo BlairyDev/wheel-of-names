@@ -1,0 +1,67 @@
+
+.parent-container {
+    display: flex;
+    
+}
+
+.container {
+    max-width: 400px;
+    height: 30px;
+    margin: 50px auto;
+    padding: 30px;
+    background: #f7f9fc;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+
+.container label {
+    display: block;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: #333;
+    font-weight: 600;
+}
+
+
+.container textarea {
+    width: 100%;
+    height: 120px;
+    padding: 15px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    resize: none;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.container textarea:focus {
+    border-color: #4D96FF;
+    box-shadow: 0 0 10px rgba(77, 150, 255, 0.3);
+}
+
+
+.container button {
+    margin-top: 20px;
+    padding: 12px 25px;
+    background: #4D96FF;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.container button:hover {
+    background: #3b7fd0;
+    transform: translateY(-2px);
+}
+
+.container button:active {
+    transform: translateY(0);
+}

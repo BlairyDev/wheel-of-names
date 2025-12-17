@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>My Winning Wheel</title>
+        <script src="node_modules/winwheel/dist/Winwheel.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <div class="parent-container">
+
+            <canvas id='myCanvas' width='1200' height='1200'>
+                Canvas not supported, use another browser.
+            </canvas>
+            <div class="container">
+                <label for="names">Enter Names</label>
+                <textarea id="enter-names"></textarea>
+                <button onClick="startSpin();">Spin the Wheel</button>
+                <button onClick="addNames();">Add names</button>
+            </div>
+
+        </div>
+        
+     
+        
+    
+        <script>
+
+            let currentWinner = "";
+            let nameList = [];
+            let secondTurn = false;
+
+            const nameMap = new Map([
+                ["Alesha", "Kiann"], ["Kiann", "Alesha"],
+                ["Chelsy", "Gab"], ["Gab", "Chelsy"],
+                ["Noreen", "Wooddey"], ["Wooddey", "Noreen"],
+                ["Gernisse", "Prince"], ["Prince", "Gernisse"],
+                ["Eliza", "Eren"], ["Eren", "Eliza"],
+                ["Sav", "Miguel"], ["Miguel", "Sav"],
+                ["Brielle", "Kiefer"], ["Kiefer", "Brielle"],
+                ["Louisse", "Bren"], ["Bren", "Louisse"],
+                ["Sean", "Dwayne"], ["Dwayne", "Sean"],
+                ["Jace", "Priya"], ["Priya", "Jace"],
+                ["Dash", "Ace"], ["Ace", "Dash"],
+                ["Canai", "Zy"], ["Zy", "Canai"],
+                ["Briana", "Chillo"], ["Chillo", "Briana"],
+                ["Zia", "Zian"], ["Zian", "Zia"]
+            ]);
+            
+            
+            let colors = [
+                "#ff6b6b",
+                "#ffd93d",
+                "#6bcb77",
+                "#4d96ff",
+                "#9d4edd",
+                "#ff922b",
+                "#38bdf8",
+                "#f472b6"
+            ];
+
+            let theWheel = new Winwheel({
+                    'canvasId'    : 'myCanvas',
+                    'fillStyle'   : '#e7706f',
+                    numSegments: 0, 
+                    'pointerAngle': 0,
+                    'pointerGuide': {
+                        'display': true,
+                        'strokeStyle': 'red',
+                        'lineWidth': 3
+                    },
+                    'outerRadius'    : 500,
+                    'lineWidth'   : 1,
+                    'animation' :                  
+                    {
+                        'type'     : 'spinToStop',  
+                        'duration' : 5,  
+                        'spins'    : 8,
+                        'callbackFinished' : 'alertPrize()',
+                        'callbackAfter' : 'drawColourTriangle()'
+                    },
+
+                });
+
+                function calculatePrize() {
+                    if (theWheel.numSegments === 0) return;
+
+                    if (currentWinner == "") {
+
+                       let segmentNumber = Math.floor(Math.random() * theWheel.numSegments) + 1
+
+                        let segment = theWheel.segments[segmentNumber];
+
+                        let stopAt = (segment.startAngle + segment.endAngle) / 2;
+
+                        stopAt -= theWheel.pointerAngle;
+
+                        theWheel.animation.stopAngle = stopAt;
+                        theWheel.startAnimation();
+
+                    } else {
+                        console.log(currentWinner);
+
+                        let selectedName = nameMap.get(currentWinner);
+                        
+                        let nameIndex = nameList.indexOf("'" + selectedName + "'");
+
+                        console.log(nameList[nameIndex]);
+
+                        console.log(nameIndex);
+
+                        let segment = getSegmentByText(selectedName);
+
+                    
+                        let stopAt = (segment.startAngle + segment.endAngle) / 2;
+
+                        stopAt -= theWheel.pointerAngle;
+
+                        theWheel.animation.stopAngle = stopAt;
+                        theWheel.startAnimation();
+
+
+                    }
+
+                    
+                    
+                }
+
+                function alertPrize()
+                {
+                    let winningSegment = theWheel.getIndicatedSegment();
+                    alert("You have won " + winningSegment.text + "!");
+                    if(!secondTurn) {
+                        currentWinner = winningSegment.text;
+                        secondTurn = true;
+                    } else {
+                        currentWinner = "";
+                        secondTurn = false;
+                    }
+                    deleteWinningSegment();
+                }
+                function getSegmentByText(text) {
+                    console.log("selectedName " + text)
+                    console.log("Wheel segments:", theWheel.segments.map(s => s && `'${s.text}'`));
+                    return theWheel.segments.find(seg => seg && seg.text === text) || null;
+                }
+
+                function addNames() {
+                    theWheel.deleteSegment();
+            
+                    theWheel.draw();
+                    const textarea = document.getElementById('enter-names')
+                    const stringNames = textarea.value;
+
+                    nameList = stringNames.split(", ").map(name => name.trim())
+
+                    nameList.forEach(name => {
+
+                        addSegment(name);
+                        
+                    });
+
+                    drawColourTriangle();
+                }
+
+                function addSegment(name)
+                {
+                    const randomColor = () =>
+                        '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+                    theWheel.addSegment({
+                        'text' : name,
+                        'fillStyle' : getRandomColor()
+                    }, 1);
+            
+                    theWheel.draw();
+                    drawColourTriangle();
+                }
+
+                function getRandomColor() {
+                    const randomIndex = Math.floor(Math.random() * colors.length)
+                    return colors[randomIndex]
+                }
+            
+                function deleteWinningSegment() {
+
+                    const winningIndex = theWheel.getIndicatedSegmentNumber();
+
+
+                    theWheel.deleteSegment(winningIndex);
+
+                    theWheel.draw();
+                    drawColourTriangle();
+                }
+
+                drawColourTriangle();
+ 
+
+                function drawColourTriangle() {
+                    let ctx = theWheel.ctx;
+                    
+                    let centerX = theWheel.canvas.width / 2;
+                    let centerY = theWheel.canvas.height / 2;
+
+                    ctx.strokeStyle = 'navy';
+                    ctx.fillStyle   = 'aqua';
+                    ctx.lineWidth   = 2;
+                    ctx.beginPath(); 
+
+                    ctx.moveTo(centerX - 50, centerY - 600);  // top-left of pointer
+                    ctx.lineTo(centerX + 50, centerY - 600);  // top-right
+                    ctx.lineTo(centerX, centerY - 550);       // tip
+                    ctx.lineTo(centerX - 49, centerY - 600);  // close
+                    ctx.stroke();              
+                    ctx.fill();   
+                }
+                function startSpin() {
+
+                    theWheel.stopAnimation(false);
+                    theWheel.rotationAngle = 0;
+                    theWheel.draw();  
+                    calculatePrize();
+                    drawColourTriangle();
+                }
+
+                function resetWheel() {
+                    theWheel.stopAnimation(false); // Stop the animation, false as param so does not call callback function.
+                    theWheel.rotationAngle = 0;   // Reset the wheel angle to 0 degrees.
+                    theWheel.draw();
+                    drawColourTriangle();
+                }
+
+
+            
+        </script>
+    </body>
+</html>
